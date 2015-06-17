@@ -31,8 +31,8 @@
 ### The gene values are automatically updated with any change on the profile.
 
 ### Genomic plot
-![alt tag](https://raw.github.com/fredcommo/aCGH_viewer/blob/master/screenshots/screen1.png)
+![alt tag](https://github.com/fredcommo/aCGH_viewer/blob/master/screenshots/screen1.png)
 
 ### Gene values
-![alt tag](https://raw.github.com/fredcommo/aCGH_viewer/blob/master/screenshots/screen2.png)
+![alt tag](https://github.com/fredcommo/aCGH_viewer/blob/master/screenshots/screen2.png)
 
