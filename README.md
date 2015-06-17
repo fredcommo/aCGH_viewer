@@ -1,14 +1,17 @@
 # aCGH_viewer
 
 ### To visualize aCGH profiles using a segmentation table of the same form as the [DNAcopy](http://www.bioconductor.org/packages/release/bioc/vignettes/DNAcopy/inst/doc/DNAcopy.pdf) (CBS) output.
-### Files should look like this:
+
+### Input format
 
 | ID | chrom | loc.start | loc.end | num.mark | seg.mean |
 |----|-------|-----------|---------|----------|----------|
-| Sample.1 | 1 | 882803 | 61849262 | 3475 | 0.0688 |
-| Sample.1 | 1 | 61851376 | 61861128 | 2 | 1.3717 |
-| Sample.1 | 1 | 61865995 | 249198060 | 11436 | 0.0013 |
-| Sample.1 | 2 | 249266324 | 492024204 | 16500 | -0.1146 |
+| Sample.1 | 1 | 882803 | 118165973 | 30208 | 0.0283 |
+| Sample.1 | 1 | 118166096 | 119534291 | 365 | 1.2952 |
+| Sample.1 | 1 | 119535183 | 154853295 | 1868 | 2.5673 |
+...
+| Sample.1 | 2 | 15703 | 235214315 | 63763 | 0.8037 |
+| Sample.1 | 2 | 235214807 | 242775910 | 2064 | 0.6753 |
 ...
 
 ### Pay attention you run the segmentation step using the chromosomal probe locations.
