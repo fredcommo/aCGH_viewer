@@ -1,6 +1,8 @@
 # aCGH_viewer
 
-### To visualize aCGH profiles using a segmentation table of the same form as the DNAcopy (CBS) output.
+### To visualize aCGH profiles using a segmentation table of the same form as the
+[DNAcopy](http://www.bioconductor.org/packages/release/bioc/vignettes/DNAcopy/inst/doc/DNAcopy.pdf)
+(CBS) output.
 ### Files should look like this:
 
 | ID | chrom | loc.start | loc.end | num.mark | seg.mean |
