@@ -80,7 +80,7 @@ shinyUI(
 
         mainPanel(
             tabsetPanel(
-                tabPanel("CGH profile",
+                tabPanel("Genomic profile",
                     plotOutput("Profile", width = "100%", height = "100%"),
                     tags$hr(),
 #                     plotOutput("LOH", width = "100%", height = "100%"),
