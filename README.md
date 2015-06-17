@@ -1,6 +1,6 @@
 # aCGH_viewer
 
-### To visualize aCGH profiles using a segmentation table of the form of the DNAcopy (CBS) output
+### To visualize aCGH profiles using a segmentation table of the same form as the DNAcopy (CBS) output.
 ### Files should look like this:
 
 | ID | chrom | loc.start | loc.end | num.mark | seg.mean |
@@ -29,3 +29,10 @@
 9. Download the gene values
 
 ### The gene values are automatically updated with any change on the profile.
+
+### Genomic plot
+![alt tag](https://raw.github.com/fredcommo/aCGH_viewer/blob/master/screenshots/screen1.png)
+
+### Gene values
+![alt tag](https://raw.github.com/fredcommo/aCGH_viewer/blob/master/screenshots/screen2.png)
+
