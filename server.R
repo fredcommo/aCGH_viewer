@@ -1,11 +1,8 @@
 ###########################
 ###########################
-require(ggplot2)
-require(grid)
 
 source('helpers.R')
 source('byGene.R')
-load("Data/hg19.rda")
 ###########################
 
 shinyServer(function(input, output, session) {
@@ -16,7 +13,12 @@ shinyServer(function(input, output, session) {
         segTable = data.frame(),
         geneTable = data.frame()
         )
-    observe({
+#     observe({
+#         Input$segTable <- .getData("example/st_example_2.csv")
+#         Input$geneTable <- ByGene(Input$segTable)
+#     })
+    
+        observe({
         Input$segTable <- .getData(input$file1$datapath)
         Input$geneTable <- ByGene(Input$segTable)
     })
@@ -113,7 +115,7 @@ shinyServer(function(input, output, session) {
     createTitle1 <- reactive({
         if(is.null(Input$segTable) || Input$segTable == 1)
             return(NULL)
-        return( unique(Input$segTable$ID) )
+        return( unique(as.character(Input$segTable$ID)) )
         })
 
     createTitle2 <- reactive({

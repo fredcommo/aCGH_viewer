@@ -1,6 +1,4 @@
 
-library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-library( org.Hs.eg.db)
 
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 geneDB  <- genes(txdb, columns=c("gene_id"))

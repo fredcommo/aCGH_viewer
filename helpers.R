@@ -1,11 +1,28 @@
 ###########################
+# Scale Shiny app on .io
+## Instance Memory
+## small  	256 MB (default)
+## medium 	512 MB
+## large 	1024 MB
+## xlarge 	2048 MB
+## xxlarge 	4096 MB
+# shinyapps::configureApp("aCGH_viewer", size="medium")
+
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library( org.Hs.eg.db)
+require(ggplot2)
+require(grid)
+load("data/hg19.rda")
+
 ###########################
 .getData <- function(filepath){
     
     if (!is.null(filepath)){
         dat <- try(read.delim(filepath, header=TRUE, sep="\t"))
         if(ncol(dat)<2)
-            dat <- try(read.csv(filepath, header=TRUE, sep=","))
+            dat <- try(read.delim(filepath, header=TRUE, sep=";"))
+        if(ncol(dat)<2)
+            dat <- try(read.delim(filepath, header=TRUE, sep=","))
         if(ncol(dat)<2){
             cat("format not supported.\n")
             return(1)
@@ -192,7 +209,7 @@
     if(is.null(gPlot))
         return(NULL)
     
-    myBlue <- rgb(0, 0.45, 1, 1)
+    myBlue <- "darkblue"
     ylim <- gPlot$coordinates$limits$y
     ymin <- min(ylim); ymax <- max(ylim)
     symbol <- as.character(geneAnnot$symbol)
@@ -202,14 +219,14 @@
 
     if(is.na(lr)) return(gPlot)
 
-    Col <- ifelse(lr<= loss, 'red3', ifelse(lr>=gain, myBlue, 'grey40'))
+    Col <- ifelse(lr<= loss, 'red3', ifelse(lr>=gain, myBlue, 'grey25'))
     gPlot <- gPlot +
         annotate("text",
             x=max(x, 2e8), y=yLabel,
             label=paste0(symbol, '\n(Log2R = ', round(lr, 3), ')'),
             cex=7, colour=Col) +
         geom_point(x=x, y=lr, cex=4, pch=19, colour="antiquewhite") +
-        geom_point(x=x, y=lr, cex=2, pch=19, colour="red")
+        geom_point(x=x, y=lr, cex=2, pch=19, colour=ifelse(lr>0, "red3", "darkblue"))
 
     return(gPlot)
 }
