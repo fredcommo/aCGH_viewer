@@ -2,7 +2,7 @@
 
 ### Interactively visualize aCGH profiles from uploaded segmentation tables.
 
-### Inputs are segmentation tables (.csv or .tsv) of the same form as the [DNAcopy](http://www.bioconductor.org/packages/release/bioc/vignettes/DNAcopy/inst/doc/DNAcopy.pdf) (CBS) output.
+### Inputs are segmentation tables (.csv or .tsv) of the same form as the [DNAcopy](http://www.bioconductor.org/packages/release/bioc/vignettes/DNAcopy/inst/doc/DNAcopy.pdf) (CBS) outputs.
 
 ### Input format
 
