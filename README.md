@@ -25,7 +25,7 @@
 5. Recenter the entire profile
 6. Rescale the y-axis
 7. Define the Gain/Loss and segment length thresholds to only display the relevant regions
-8. Download the profile as it's on the screen
-9. Download the genes values
+8. Download the profile as it appears on the screen
+9. Download the gene values
 
 ### The gene values are automatically updated with any change on the profile.
