@@ -59,6 +59,13 @@ tr{
     margin-bottom: 10px !important;
     padding: 10px;
 }
+.col-sm-12 {
+    float: left;
+    width: auto !important;
+    margin-bottom: 5px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
 .well {
     background-color: #DBE9F1;
     border: none;
