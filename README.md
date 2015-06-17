@@ -1,4 +1,4 @@
--># aCGH_viewer<-
+# ->aCGH_viewer<-
 
 #### Interactively visualize aCGH profiles from uploaded segmentation tables.
 
