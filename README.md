@@ -14,18 +14,18 @@
 ### Pay attention you run the segmentation step using the chromosomal probe locations.
 
 ### Two screens for a full information
-1 - The genomic profile
-2 - The gene values
+1. The genomic profile
+2. The gene values
 
 ### aCGH Viewer features:
-1 - Load a segmentation file stored locally
-2 - display genes using valid HUGO symbols
-3 - Select the full profil, or a specific chromosome
-4 - Change the gain/loss color palette
-5 - Recenter the entire profile
-6 - Rescale the y-axis
-7 - Define the Gain/Loss and segment length thresholds to only display the relevant regions
-8 - Download the profile as it's on the screen
-9 - Download the genes values
+1. Load a segmentation file stored locally
+2. display genes using valid HUGO symbols
+3. Select the full profil, or a specific chromosome
+4. Change the gain/loss color palette
+5. Recenter the entire profile
+6. Rescale the y-axis
+7. Define the Gain/Loss and segment length thresholds to only display the relevant regions
+8. Download the profile as it's on the screen
+9. Download the genes values
 
 ### The gene values are automatically updated with any change on the profile.
