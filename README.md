@@ -1,6 +1,8 @@
 # aCGH_viewer
 
-### To visualize aCGH profiles using a segmentation table of the same form as the [DNAcopy](http://www.bioconductor.org/packages/release/bioc/vignettes/DNAcopy/inst/doc/DNAcopy.pdf) (CBS) output.
+### Interactively visualize aCGH profiles from uploaded segmentation tables.
+
+### Inputs are segmentation tables (.csv or .tsv) of the same form as the [DNAcopy](http://www.bioconductor.org/packages/release/bioc/vignettes/DNAcopy/inst/doc/DNAcopy.pdf) (CBS) output.
 
 ### Input format
 
@@ -32,6 +34,8 @@
 9. Download the gene values
 
 ### The gene values are automatically updated with any change on the profile.
+
+### The confidentiality is preserved: uploaded files are instantaneously removed. Nothing is stored.
 
 ### Genomic plot
 ![alt tag](https://github.com/fredcommo/aCGH_viewer/blob/master/screenshots/screen1.png)
