@@ -1,8 +1,8 @@
--> # aCGH_viewer <-
+# aCGH_viewer
 
 #### Interactively visualize aCGH profiles from uploaded segmentation tables.
 
-### ->Download an [example file](https://github.com/fredcommo/aCGH_viewer/tree/master/example), then [Try me](https://fredcommo.shinyapps.io/aCGH_viewer)<-
+### Download an [example file](https://github.com/fredcommo/aCGH_viewer/tree/master/example), then [Try me](https://fredcommo.shinyapps.io/aCGH_viewer)
 
 #### Inputs are segmentation tables (.csv or .tsv) of the same form as the [DNAcopy](http://www.bioconductor.org/packages/release/bioc/vignettes/DNAcopy/inst/doc/DNAcopy.pdf) (CBS) outputs.
 
