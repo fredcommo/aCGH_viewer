@@ -40,7 +40,7 @@
 
 #### The confidentiality is preserved: uploaded files are instantaneously removed. Nothing is stored on the server.
 
-### Genomic plot
+### Genomic profile
 ![alt tag](https://github.com/fredcommo/aCGH_viewer/blob/master/screenshots/screen1.png)
 
 ### Gene values
