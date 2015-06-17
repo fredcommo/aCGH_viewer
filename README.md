@@ -18,7 +18,8 @@
 | Sample.1 | 2 | 235214807 | 242775910 | 2064 | 0.6753 |
 | ... | ... | ... | ... | ... | ... |
 
-#### Pay attention you run the segmentation step using the chromosomal probe locations.
+#### Important note:
+##### Chromosomal probe locations (not genomic) must be used when the CNA object is built.
 
 #### Two screens for a full information
 1. The genomic profile
@@ -35,9 +36,9 @@
 8. Download the profile as it appears on the screen
 9. Download the gene values
 
-#### The gene values are automatically updated with any change on the profile.
+#### The gene values are automatically updated with any change made on the profile.
 
-#### The confidentiality is preserved: uploaded files are instantaneously removed. Nothing is stored.
+#### The confidentiality is preserved: uploaded files are instantaneously removed. Nothing is stored on the server.
 
 ### Genomic plot
 ![alt tag](https://github.com/fredcommo/aCGH_viewer/blob/master/screenshots/screen1.png)
