@@ -40,8 +40,9 @@ tr{
 .row {
     display: -webkit-flex !important;
     display: inline-flex !important;
-    width: 100% !important; 
+    width: auto !important; 
     height: auto;
+    margin: 0;
 }
 .col-sm-4{
     max-width: 300px !important;
