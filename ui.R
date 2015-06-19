@@ -9,14 +9,21 @@ shinyUI(
         tags$head( tags$link(rel="stylesheet", type="text/css", href="style.css") ),
 
         tags$hr(),
-        h4("Choose a file", em("(.csv, .tsv, .txt)")),
+        h4("Choose a file", br(),
+           div(id="ftype", em("(.csv, .tsv, .txt, .bz2, .gz)"))
+           ),
         fileInput('file1', '', accept=c(  'text/csv',
-                                          'text/comma-separated-values',
-                                          'text/tab-separated-values',
-                                          'text/plain',
-                                          '.csv',
-                                          '.tsv')
-                  ),
+                                              'text/comma-separated-values',
+                                              'text/tab-separated-values',
+                                              'text/plain',
+                                              'application/x-bzip2',
+                                              'application/x-gzip',
+                                              '.csv',
+                                              '.tsv',
+                                              '.txt',
+                                              '.bz2',
+                                              '.gz')
+        ),
         tags$hr(),
                 
         h4('Gene symbol'),
@@ -89,6 +96,7 @@ shinyUI(
                 tabPanel("Genomic profile",
                     plotOutput("Profile", width = "100%", height = "100%"),
                     tags$hr(),
+                    textOutput("progress1", inline=TRUE),
 #                     plotOutput("LOH", width = "100%", height = "100%"),
 #                     tags$hr(),
                     div(
@@ -101,7 +109,8 @@ shinyUI(
                     h4(textOutput("tableTitle1"), align="center"),
                     h4(textOutput("tableTitle2"), align="center"),
                     tags$hr(),
-                    dataTableOutput("fullTable")
+                    dataTableOutput("fullTable"),
+                    textOutput("progress2", inline=TRUE)
                     )
                 )
             )

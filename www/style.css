@@ -40,7 +40,7 @@ tr{
 .row {
     display: -webkit-flex !important;
     display: inline-flex !important;
-    width: auto !important; 
+    width: 100% !important; 
     height: auto;
     margin: 0;
 }
@@ -71,13 +71,21 @@ tr{
     background-color: #DBE9F1;
     border: none;
 }
+#ftype{
+    font-size: 15px;
+}
 #Profile{
     border: 1px solid #DBE9F1;
     margin-top: 10px;
     margin-bottom: 10px;
 }
+#progress1, #progress2{
+    font-size: 22px;
+}
+/*
 #LOH{
     border: 1px solid #DBE9F1;
     margin-top: 10px;
     margin-bottom: 10px;
 }
+*/
