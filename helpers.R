@@ -14,21 +14,44 @@ require(ggplot2)
 require(grid)
 load("data/hg19.rda")
 
+options(warn=-1)
 ###########################
 .getData <- function(filepath){
     
     if (!is.null(filepath)){
-        dat <- try(read.delim(filepath, header=TRUE, sep="\t"))
+        dat <- try(read.delim(filepath, header=TRUE, sep="\t", comment.char = c("#")))
         if(ncol(dat)<2)
-            dat <- try(read.delim(filepath, header=TRUE, sep=";"))
+            dat <- try(read.delim(filepath, header=TRUE, sep=";", comment.char = c("#")))
         if(ncol(dat)<2)
-            dat <- try(read.delim(filepath, header=TRUE, sep=","))
+            dat <- try(read.delim(filepath, header=TRUE, sep=",", comment.char = c("#")))
+        if(ncol(dat)<2)
+            dat <- try(read.delim(filepath, header=TRUE, sep=" ", comment.char = c("#")))
         if(ncol(dat)<2){
             cat("format not supported.\n")
             return(1)
         }
+        
+        # Mandatory columns
+        expectedCols <- c("chrom", "loc.start", "loc.end", "seg.mean")
+        if(!all(expectedCols %in% colnames(dat)))
+            stop("Missing columns: ", setdiff(expectedCols, colnames(dat)))
+
+        # Not a big deal if one of those is missing.
         if(!"probes.Sd" %in% colnames(dat))
-            dat <- cbind.data.frame(dat, "probes.Sd" = rep(1, nrow(dat)))
+            dat <- cbind.data.frame(dat, "probes.Sd" = rep(.8, nrow(dat)))
+        if(!"ID" %in% colnames(dat))
+            dat <- cbind.data.frame(dat, "ID" = rep(NA, nrow(dat)))
+
+        # Estimate num.mark from segment length, when missing
+        if(!"num.mark" %in% colnames(dat)){
+            d <- abs(dat$loc.end - dat$loc.start)
+            nm <- ceiling(11.2 + 3.05e-04*d + rnorm(length(d), 0, 10))
+            if(any(nm<8))
+                nm[nm<8] <- 8
+            dat <- cbind.data.frame(dat, "num.mark" = nm)
+        }
+        
+        dat <- dat[,c("ID", "chrom", "loc.start", "loc.end", "num.mark", "seg.mean", "probes.Sd")]
         dat <- .chrToGenomeLoc(dat)
         cat("Returning dat\n")
         system(sprintf("rm %s", filepath))
@@ -98,7 +121,7 @@ load("data/hg19.rda")
             panel.grid.major=element_blank(),
             panel.grid.minor=element_blank(),
             plot.margin=unit(c(4,4,4,0),"mm"),
-            axis.text=element_text(size=15),
+            axis.text=element_text(size=12),
             axis.title=element_text(size=20),
             axis.title.x=element_text(vjust=-.5),
             axis.title.y=element_text(hjust=.5, vjust = .75),
@@ -110,8 +133,8 @@ load("data/hg19.rda")
     if(is.null(gPlot))
         return(NULL)
     
-    ymin <- (min(gPlot$data$l2r, na.rm=TRUE) - .75)*Ymin
-    ymin <- max(-2.5, ymin)
+    ymin <- (min(gPlot$data$l2r, na.rm=TRUE) - 0.5)*Ymin
+    ymin <- min(-2.5, ymin)
     ymax <- (max(gPlot$data$l2r, na.rm=TRUE) + .75)*Ymax
     if(chr != "All"){
         chr <- as.numeric(chr)
@@ -119,8 +142,7 @@ load("data/hg19.rda")
         xmin <- ifelse(chr==1, 0, cumLen[chr-1])
         xmax <- cumLen[chr]
         gPlot <- gPlot + 
-            coord_cartesian(xlim = range(xmin, xmax),
-                ylim=range(ymin, ymax)) +
+            coord_cartesian(xlim = range(xmin, xmax), ylim=range(ymin, ymax)) +
             scale_y_continuous(breaks = seq(round(ymin), round(ymax), by = 0.5)) +
             geom_point(pch = 19, cex = 1, col = 'grey50')
     }
@@ -224,10 +246,11 @@ load("data/hg19.rda")
         annotate("text",
             x=max(x, 2e8), y=yLabel,
             label=paste0(symbol, '\n(Log2R = ', round(lr, 3), ')'),
-            cex=7, colour=Col) +
-        geom_point(x=x, y=lr, cex=4, pch=19, colour="antiquewhite") +
-        geom_point(x=x, y=lr, cex=2, pch=19, colour=ifelse(lr>0, "red3", "darkblue"))
-
+            cex=5, colour=Col) +
+        geom_point(x=x, y=lr, cex=5, pch=19, colour="antiquewhite") +
+        geom_point(x=x, y=lr, cex=2, pch=19, colour="darkorchid4") + #colour=ifelse(lr>0, "red3", "darkblue"))
+        geom_point(x=x, y=lr, cex=.25, pch=19, colour="cyan")
+    
     return(gPlot)
 }
 .geneOfInt <- function(symbol, geneTable){

@@ -65,11 +65,14 @@ geneDB  <- genes(txdb, columns=c("gene_id"))
     if(length(idx) == 0)
         return(NULL)
 
-    bySymbol <- select(org.Hs.eg.db,
+    bySymbol <- try(select(org.Hs.eg.db,
                         keys=geneDB$gene_id[idx],
                         keytype='ENTREZID',
                         columns=c('SYMBOL', 'GENENAME', 'MAP')
-        )
+        ), silent=TRUE)
+    if(inherits(bySymbol, "try-error"))
+        return(NULL)
+    
     byRange <- as.data.frame(geneDB[idx])
         
     geneList <- merge(bySymbol, byRange,
@@ -110,7 +113,7 @@ ByGene <- function(st){
     st <- .genometoChrLoc(st)
     hg19 <- hg19
     bygene <- lapply(seq_len(nrow(st)), function(ii){
-        g <- .getGenesFromSeg(st$chrom[ii], st$loc.start[ii], st$loc.end[ii])
+        g <- .getGenesFromSeg(chr=st$chrom[ii], Start=st$loc.start[ii], End=st$loc.end[ii])
         if(is.null(g))
             return(NULL)
 
