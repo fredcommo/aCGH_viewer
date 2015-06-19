@@ -75,7 +75,7 @@ shinyServer(function(input, output, session) {
                 selected[,ii] <- as.character(selected[,ii])
         } else{
             selected <- data.frame(message=sprintf("\"%s\" does not seem to be 
-                an official symbol.", gene$symbol))
+                an official HUGO symbol.", gene$symbol))
         }
         return(selected)
         })
@@ -124,8 +124,16 @@ shinyServer(function(input, output, session) {
         return( sprintf("Gain threshold: %s, Loss threshold: %s", hi, lo) )
         })
 
+    progressText <- reactive({
+        if(is.null(input$file1$datapath))
+            return("Waiting for a file to load ...")
+        return(NULL)
+    })
+
     # outputs to ui
     output$Profile <- renderPlot({ createCGHplot() }, res=120, width=1500, height=650)
+    output$progress1 <- renderText( progressText() )
+    output$progress2 <- renderText( progressText() )
     output$geneSummary <- renderTable({ createSummary() })
     output$tableTitle1 <- renderText({ createTitle1() })
     output$tableTitle2 <- renderText({ createTitle2() })
@@ -156,5 +164,6 @@ shinyServer(function(input, output, session) {
             write.table(out, file, sep="\t", row.names=FALSE)
         }
         )
+
     session$onSessionEnded(function() { stopApp() })
     })
