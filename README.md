@@ -41,12 +41,13 @@
 1. Load a segmentation file stored locally
 2. display genes using valid HUGO symbols
 3. Select the full profil, or a specific chromosome
-4. Change the gain/loss color palette
-5. Recenter the entire profile
-6. Rescale the y-axis
-7. Define the Gain/Loss and segment length thresholds to only display the relevant regions
-8. Download the profile as it appears on the screen
-9. Download the gene values
+4. Merge segments shorter than a specified valie, in Kb
+5. Change the gain/loss color palette
+6. Recenter the entire profile
+7. Rescale the y-axis
+8. Define the Gain/Loss and segment length thresholds to only display the relevant regions
+9. Download the profile as it appears on the screen
+10. Download the gene values
 
 #### The gene values are automatically updated with any change made on the profile.
 
