@@ -6,7 +6,7 @@
 
 #### Inputs are segmentation tables (.csv or .tsv) of the same form as the [DNAcopy](http://www.bioconductor.org/packages/release/bioc/vignettes/DNAcopy/inst/doc/DNAcopy.pdf) (CBS) outputs.
 
-#### Input format
+#### Minimal input format
 
 | ID | chrom | loc.start | loc.end | num.mark | seg.mean |
 |----|-------|-----------|---------|----------|----------|
@@ -18,8 +18,20 @@
 | Sample.1 | 2 | 235214807 | 242775910 | 2064 | 0.6753 |
 | ... | ... | ... | ... | ... | ... |
 
+#### Alternative input format, as provided by the [rCGH](http://bioconductor.org/packages/devel/bioc/html/rCGH.html) R package.
+
+| ID | chrom | loc.start | loc.end | num.mark | seg.mean | probes.Sd |
+|----|-------|-----------|---------|----------|----------|
+| Sample.1 | 1 | 882803 | 118165973 | 30208 | 0.0283 | O.8765 |
+| Sample.1 | 1 | 118166096 | 119534291 | 365 | 1.2952 | 1.1234 |
+| Sample.1 | 1 | 119535183 | 154853295 | 1868 | 2.5673 | 0.9765 |
+| ... | ... | ... | ... | ... | ... | ... |
+| Sample.1 | 2 | 15703 | 235214315 | 63763 | 0.8037 | 1.1348 |
+| Sample.1 | 2 | 235214807 | 242775910 | 2064 | 0.6753 | 0.9583 |
+| ... | ... | ... | ... | ... | ... | ... |
+
 #### Important note:
-##### Chromosomal probe locations (not genomic) must be used when the CNA object is built.
+##### Chromosomal probes locations must be used when the CNA object is built, not the genomic ones.
 
 #### Two screens for a full information
 1. The genomic profile
