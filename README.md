@@ -40,7 +40,7 @@
 #### aCGH Viewer features:
 1. Load a segmentation file stored locally
 2. display genes using valid HUGO symbols
-3. Select the full profil, or a specific chromosome
+3. Select the full profile, or a specific chromosome
 4. Merge segments shorter than a specified valie, in Kb
 5. Change the gain/loss color palette
 6. Recenter the entire profile
