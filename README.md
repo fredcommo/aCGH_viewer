@@ -45,7 +45,7 @@
 5. Merge segments shorter than a specified valie, in Kb
 6. Recenter the entire profile
 7. Rescale the y-axis
-8. Define the Gain/Loss and segment length thresholds to only display the relevant regions
+8. Define the Gain/Loss and segment length thresholds to only display the relevant regions. The 'Genes table' will be filtered, accordingly.
 9. Download the profile as it appears on the screen
 10. Download the gene values
 
