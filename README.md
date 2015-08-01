@@ -21,7 +21,7 @@
 #### Alternative input format, as provided by the [rCGH](http://bioconductor.org/packages/devel/bioc/html/rCGH.html) R package.
 
 | ID | chrom | loc.start | loc.end | num.mark | seg.mean | probes.Sd |
-|----|-------|-----------|---------|----------|----------|
+|----|-------|-----------|---------|----------|----------|-----------|
 | Sample.1 | 1 | 882803 | 118165973 | 30208 | 0.0283 | O.8765 |
 | Sample.1 | 1 | 118166096 | 119534291 | 365 | 1.2952 | 1.1234 |
 | Sample.1 | 1 | 119535183 | 154853295 | 1868 | 2.5673 | 0.9765 |
