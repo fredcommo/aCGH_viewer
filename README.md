@@ -60,3 +60,4 @@
 ### Gene values
 ![alt tag](https://github.com/fredcommo/aCGH_viewer/blob/master/screenshots/screen2.png)
 
+#### Feel free to clone this repo, and to install the app on your own server.
