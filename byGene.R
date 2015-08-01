@@ -1,4 +1,6 @@
 
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library( org.Hs.eg.db)
 
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 geneDB  <- genes(txdb, columns=c("gene_id"))
@@ -46,6 +48,38 @@ geneDB  <- genes(txdb, columns=c("gene_id"))
         })
     return(do.call(c, relativeLog))
 }
+# .getGenesFromSeg <- function(chr, Start, End){
+#     # chr: a integer, from 1 to 24
+#     # Start, End: numeric. Start/End segment position (from segmentation table)
+
+#     geneDB <- geneDB
+
+#     if(chr==23) chr <- "X"
+#     if(chr==24) chr <- "Y"
+    
+#     chr <- sprintf("chr%s", chr)
+
+#     ii <- which(as.vector(seqnames(geneDB)) == chr)
+#     jj <- intersect(ii, which(Start <= start(geneDB) & start(geneDB) <= End))
+#     kk <- intersect(ii, which(Start <= end(geneDB) & end(geneDB) <= End))
+#     idx <- unique(union(jj, kk))
+
+#     if(length(idx) == 0)
+#         return(NULL)
+
+#     bySymbol <- select(org.Hs.eg.db,
+#                         keys=geneDB$gene_id[idx],
+#                         keytype='ENTREZID',
+#                         columns=c('SYMBOL', 'GENENAME', 'MAP')
+#         )
+#     byRange <- as.data.frame(geneDB[idx])
+        
+#     geneList <- merge(bySymbol, byRange,
+#                         by.x = "ENTREZID", by.y = "gene_id", all = TRUE)
+
+#     .renameGeneList(geneList)
+# }
+
 .getGenesFromSeg <- function(chr, Start, End){
     # chr: a integer, from 1 to 24
     # Start, End: numeric. Start/End segment position (from segmentation table)
@@ -106,6 +140,16 @@ geneDB  <- genes(txdb, columns=c("gene_id"))
     rownames(bygene) <- seq_len(nrow(bygene))
     bygene
 }
+.genometoChrLoc <- function(segTable){
+    splitTable <- split(segTable, segTable$chrom)
+    newTable <- lapply(splitTable, function(tmp){
+        chr <- unique(tmp$chrom)
+        tmp$loc.start <- tmp$loc.start - hg19$cumlen[chr]
+        tmp$loc.end <- tmp$loc.end - hg19$cumlen[chr]
+        tmp
+    })
+    do.call(rbind.data.frame, newTable)
+}
 ByGene <- function(st){
     if(is.null(st) || st == 1)
         return(NULL)
@@ -120,7 +164,7 @@ ByGene <- function(st){
         cbind.data.frame(g,
                         Log2Ratio=st$seg.mean[ii],
                         num.mark=st$num.mark[ii], segNum=ii,
-                        "segLength(kb)"=round(abs(g$chrEnd - g$chrStart)/1e3, 2)
+                        "segLength(kb)"=round(abs(st$loc.start[ii] - st$loc.end[ii])/1e3, 2)
                         )
     })
     bygene <- do.call(rbind, bygene)

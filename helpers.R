@@ -16,6 +16,12 @@ load("data/hg19.rda")
 
 options(warn=-1)
 ###########################
+.welcome <- function(){
+    msg <- "Waiting for a file to load ..."
+    plot.new()
+    legend("center", legend = msg, bty = "n", cex = 1.75, text.col = "blue")
+    return(NULL)
+}
 .getData <- function(filepath){
     
     if (!is.null(filepath)){
@@ -269,6 +275,56 @@ options(warn=-1)
     sprintf("<a href=\"http://www.ncbi.nlm.nih.gov/gene/?term=%s[uid]\" 
     target=\"_blank\" style=\"font-size:18px; \">%s</a>", uid, uid)
 }
+
+###########################
+# MERGING SEGMENTS
+.getSegLen <- function(seg){
+    abs(seg$loc.end - seg$loc.start)/1e3
+}
+.smoothSeg <- function(segTable, minSeg){
+    minSeg <- as.numeric(minSeg)
+    splitSegTables <- split(segTable, segTable$chrom)
+    adjustedLocs <- lapply(splitSegTables, function(sst){
+        if(nrow(sst)<2)
+            return(sst)
+        L <- .getSegLen(sst)
+        while(any(L < minSeg)){
+            i <- which(L < minSeg)[1]
+            j <- .getCloser(sst, i)
+            sst <- .mergeSegments(sst, i, j)
+            sst <- sst[-i,]
+            L <- .getSegLen(sst)
+            }
+        return(sst)
+        })
+
+    adjustedLocs <- as.data.frame(do.call(rbind, adjustedLocs))
+    rownames(adjustedLocs) <- seq(1, nrow(adjustedLocs))
+
+    return(adjustedLocs)
+}
+.getCloser <- function(segTable, idx){
+    if(idx==1){
+        return(idx+1)
+    } else if (idx==nrow(segTable)){
+        return(idx-1)
+    } else {
+        delta <- abs(segTable$seg.mean[c(idx-1,idx+1)] - segTable$seg.mean[idx])
+        i <- ifelse(which.min(delta)==1, idx-1, idx+1)
+        return(i)
+    }
+}
+.mergeSegments <- function(segTable, i, j){
+    if(j<i){
+        segTable$loc.end[j] <- segTable$loc.end[i]
+    } else {
+        segTable$loc.start[j] <- segTable$loc.start[i]
+    }
+    segTable$num.mark[j] <- segTable$num.mark[j] + segTable$num.mark[i]
+    return(segTable)
+}
+
+#segTable <- .smoothSeg(segTable, minSeg)
 
 # End helper functions
 ###########################

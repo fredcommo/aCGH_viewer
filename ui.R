@@ -37,18 +37,14 @@ shinyUI(
                 selected = 'All')),
         tags$hr(),
         
-#        h4("Gain/Loss colors"),
         column(width=12,
                div(class = "form-group",
                    radioButtons("GLcols", "Gain/Loss colors",
                                 choices = c("blue/red", "red/blue"), inline = TRUE)
                )
         ),
-#         div(id="GLcols", style="margin-top: -20px;",
-#             radioButtons("GLcols", "", c("blue/red", "red/blue"))
-#             ),
-#        tags$hr(),
 
+        textInput("minSeg", "Merging segments shorter than (Kb)", 25),
         sliderInput("center", "Recenter profile", min=-1.5, max=1.5, value=0,
             step = .1),
         sliderInput("Ymax", "Rescale max(y)", min=.1, max=1, value=1, step=.1),

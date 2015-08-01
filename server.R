@@ -9,43 +9,38 @@ shinyServer(function(input, output, session) {
 
     options(shiny.deprecation.messages=FALSE)
     
-    Input <- reactiveValues(
-        segTable = data.frame(),
-        geneTable = data.frame()
-        )
-#     observe({
-#         Input$segTable <- .getData("example/st_example_2.csv")
-#         Input$geneTable <- ByGene(Input$segTable)
-#     })
-    
-        observe({
-        Input$segTable <- .getData(input$file1$datapath)
-        Input$geneTable <- ByGene(Input$segTable)
-    })
+    Input <- reactiveValues( segTable = data.frame() )    
+    observe({ Input$segTable <- .getData(input$file1$datapath) })
 
-    gene <- reactiveValues(symbol=character())
-    observe({gene$symbol <- toupper(input$geneSymb)})
+    gene <- reactiveValues( symbol=character() )
+    observe({ gene$symbol <- toupper(input$geneSymb) })
 
     reCenterSeg <- reactive({
         seg <- Input$segTable
-        if(!is.null(seg) && seg != 1)
+        if(!is.null(seg) && seg != 1){
+            if(as.numeric(input$minSeg) > 10)
+                seg <- .smoothSeg(seg, input$minSeg)
             seg$seg.mean <- seg$seg.mean + input$center
             return(seg)
+            }
         return(NULL)
         })
 
     reCenterGenes <- reactive({
-        if(is.null(Input$geneTable))
+        if(is.null(Input$segTable))
             return(NULL)
-        geneTable <- Input$geneTable
+
+        geneTable <- ByGene(reCenterSeg())
         geneTable$Log2Ratio <- geneTable$Log2Ratio + input$center
         return(geneTable)
         })
 
     createCGHplot <- reactive({
         seg <- reCenterSeg()
-        if(is.null(seg))
+        if(is.null(seg)){
+            .welcome()
             return(NULL)
+        }
         gPlot <- .mainPlot(seg)
         gPlot <- .addSegments(gPlot, seg, input$chr, input$gain, input$loss, input$segLen, input$GLcols)
         gPlot <- .updateScale(gPlot, input$chr, hg19, input$Ymin, input$Ymax)
@@ -125,8 +120,11 @@ shinyServer(function(input, output, session) {
         })
 
     progressText <- reactive({
-        if(is.null(input$file1$datapath))
-            return("Waiting for a file to load ...")
+        if(is.null(input$file1$datapath)){
+            giturl <- "https://github.com/fredcommo/aCGH_viewer"
+            msg <- sprintf("Get example formats at: %s", giturl)
+            return(msg)
+            }
         return(NULL)
     })
 
