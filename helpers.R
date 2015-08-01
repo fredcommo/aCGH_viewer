@@ -139,8 +139,8 @@ options(warn=-1)
     if(is.null(gPlot))
         return(NULL)
     
-    ymin <- (min(gPlot$data$l2r, na.rm=TRUE) - 0.5)*Ymin
-    ymin <- min(-2.5, ymin)
+    ymin <- max(-3.5, min(gPlot$data$l2r, na.rm=TRUE) - 0.5)*Ymin
+    ymin <- min(-1, ymin)
     ymax <- (max(gPlot$data$l2r, na.rm=TRUE) + .75)*Ymax
     if(chr != "All"){
         chr <- as.numeric(chr)
@@ -243,7 +243,7 @@ options(warn=-1)
     symbol <- as.character(geneAnnot$symbol)
     x <- geneAnnot$genomeStart
     lr <- geneAnnot$Log2Ratio
-    yLabel <- ifelse((lr+1)<ymax, lr+1, lr-1)
+    yLabel <- ifelse((lr+.8)<ymax, lr+.8, lr-.8)
 
     if(is.na(lr)) return(gPlot)
 
@@ -253,9 +253,10 @@ options(warn=-1)
             x=max(x, 2e8), y=yLabel,
             label=paste0(symbol, '\n(Log2R = ', round(lr, 3), ')'),
             cex=5, colour=Col) +
-        geom_point(x=x, y=lr, cex=5, pch=19, colour="antiquewhite") +
-        geom_point(x=x, y=lr, cex=2, pch=19, colour="darkorchid4") + #colour=ifelse(lr>0, "red3", "darkblue"))
-        geom_point(x=x, y=lr, cex=.25, pch=19, colour="cyan")
+        geom_point(x=x, y=lr, size=6, pch=19, colour="black") +
+        geom_point(x=x, y=lr, size=5, pch=19, colour="antiquewhite") +
+        geom_point(x=x, y=lr, size=4, pch=19, colour="darkorchid4") + #colour=ifelse(lr>0, "red3", "darkblue"))
+        geom_point(x=x, y=lr, size=1, pch=19, colour="cyan")
     
     return(gPlot)
 }
