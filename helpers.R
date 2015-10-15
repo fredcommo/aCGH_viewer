@@ -1,3 +1,7 @@
+#############
+#aCGH_viewer
+#############
+
 ###########################
 # Scale Shiny app on .io
 ## Instance Memory
@@ -8,11 +12,12 @@
 ## xxlarge 	4096 MB
 # shinyapps::configureApp("aCGH_viewer", size="medium")
 
-library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-library( org.Hs.eg.db)
+message("Sourcing helpers...")
 require(ggplot2)
 require(grid)
+load("data/hg18.rda")
 load("data/hg19.rda")
+load("data/hg38.rda")
 
 options(warn=-1)
 ###########################
@@ -22,8 +27,9 @@ options(warn=-1)
     legend("center", legend = msg, bty = "n", cex = 1.75, text.col = "blue")
     return(NULL)
 }
-.getData <- function(filepath){
-    
+.getData <- function(filepath, minSeg, gBuild){
+	minSeg <- as.numeric(minSeg)
+
     if (!is.null(filepath)){
         dat <- try(read.delim(filepath, header=TRUE, sep="\t", comment.char = c("#")))
         if(ncol(dat)<2)
@@ -41,13 +47,15 @@ options(warn=-1)
         expectedCols <- c("chrom", "loc.start", "loc.end", "seg.mean")
         if(!all(expectedCols %in% colnames(dat)))
             stop("Missing columns: ", setdiff(expectedCols, colnames(dat)))
-
+        
         # Not a big deal if one of those is missing.
+        if(!"seg.med" %in% colnames(dat))
+            dat <- cbind.data.frame(dat, "seg.med" = dat$seg.mean)
         if(!"probes.Sd" %in% colnames(dat))
             dat <- cbind.data.frame(dat, "probes.Sd" = rep(.8, nrow(dat)))
         if(!"ID" %in% colnames(dat))
             dat <- cbind.data.frame(dat, "ID" = rep(NA, nrow(dat)))
-
+        
         # Estimate num.mark from segment length, when missing
         if(!"num.mark" %in% colnames(dat)){
             d <- abs(dat$loc.end - dat$loc.start)
@@ -57,36 +65,25 @@ options(warn=-1)
             dat <- cbind.data.frame(dat, "num.mark" = nm)
         }
         
-        dat <- dat[,c("ID", "chrom", "loc.start", "loc.end", "num.mark", "seg.mean", "probes.Sd")]
-        dat <- .chrToGenomeLoc(dat)
+        dat <- dat[,c("ID", "chrom", "loc.start", "loc.end", "num.mark", "seg.mean", "seg.med", "probes.Sd")]
+
+        if(!is.na(minSeg) && minSeg > 10)
+            dat <- .smoothSeg(dat, minSeg)
+
+        HG <- switch(gBuild,
+        	hg18 = hg18,
+        	hg19 = hg19,
+        	hg38 = hg38)
+
+        dat <- .chrToGenomeLoc(dat, HG)
+        rownames(dat) <- 1:nrow(dat)
         cat("Returning dat\n")
-        system(sprintf("rm %s", filepath))
+#        system(sprintf("rm %s", filepath))
         return(dat)
     }
     cat("Returning NULL\n")
     return(NULL)
 }
-.chrToGenomeLoc <- function(segTable){
-    splitTable <- split(segTable, segTable$chrom)
-    newTable <- lapply(splitTable, function(tmp){
-        chr <- unique(tmp$chrom)
-        tmp$loc.start <- tmp$loc.start + hg19$cumlen[chr]
-        tmp$loc.end <- tmp$loc.end + hg19$cumlen[chr]
-        tmp
-    })
-    do.call(rbind.data.frame, newTable)
-}
-.genometoChrLoc <- function(segTable){
-    splitTable <- split(segTable, segTable$chrom)
-    newTable <- lapply(splitTable, function(tmp){
-        chr <- unique(tmp$chrom)
-        tmp$loc.start <- tmp$loc.start - hg19$cumlen[chr]
-        tmp$loc.end <- tmp$loc.end - hg19$cumlen[chr]
-        tmp
-    })
-    do.call(rbind.data.frame, newTable)
-}
-
 .getName <- function(segTable){
     return( unique(as.character(segTable$ID)) )
 }
@@ -112,7 +109,7 @@ options(warn=-1)
         n <- ceiling(segTable$num.mark[i]/w)
         n <- max(50, n)
         x <- seq(segTable$loc.start[i], segTable$loc.end[i], len=n)
-        y <- rnorm(n, segTable$seg.mean[i], segTable$probes.Sd[i]/s)
+        y <- rnorm(n, segTable$seg.med[i], segTable$probes.Sd[i]/s)
         return(cbind(loc=x, l2r=y))
     })
     X <- as.data.frame(do.call(rbind, X))
@@ -135,16 +132,21 @@ options(warn=-1)
             )
         return(gPlot)
 }
-.updateScale <- function(gPlot, chr, hg19, Ymin, Ymax){
+.updateScale <- function(gPlot, chr, gBuild, Ymin, Ymax){
     if(is.null(gPlot))
         return(NULL)
     
+    HG <- switch(gBuild,
+        	hg18 = hg18,
+        	hg19 = hg19,
+        	hg38 = hg38)
+
     ymin <- max(-3.5, min(gPlot$data$l2r, na.rm=TRUE) - 0.5)*Ymin
     ymin <- min(-1, ymin)
     ymax <- (max(gPlot$data$l2r, na.rm=TRUE) + .75)*Ymax
     if(chr != "All"){
         chr <- as.numeric(chr)
-        cumLen <- cumsum(as.numeric(hg19$length))
+        cumLen <- cumsum(as.numeric(HG$length))
         xmin <- ifelse(chr==1, 0, cumLen[chr-1])
         xmax <- cumLen[chr]
         gPlot <- gPlot + 
@@ -154,7 +156,7 @@ options(warn=-1)
     }
     else
         gPlot <- gPlot + 
-            coord_cartesian(xlim = range(-0.5e8, hg19$cumlen[24]+0.5e8),
+            coord_cartesian(xlim = range(-0.5e8, HG$cumlen[24]+0.5e8),
                 ylim=range(ymin, ymax)) +
             scale_y_continuous(breaks = seq(round(ymin), round(ymax), by = 0.5))
 
@@ -183,31 +185,34 @@ options(warn=-1)
         lossCol <- rgb(0, 0.45, 1, 1)
     }
 
-    #myBlue <- rgb(0, 0.45, 1, 1)
-
     segTable <- segTable[which(segTable$chrom %in% chr),]
     L <- abs(segTable$loc.end - segTable$loc.start)/1e6
-    idx <- which((segTable$seg.mean<= loss | segTable$seg.mean>= gain) & 
+    idx <- which((segTable$seg.med<= loss | segTable$seg.med>= gain) & 
         L <= segLen)
 
     if(length(idx)>0){
         subTable <- segTable[idx,]
-        GLcolors <- ifelse(subTable$seg.mean<= loss, lossCol,
-            ifelse(subTable$seg.mean>= gain, gainCol, "black")
+        GLcolors <- ifelse(subTable$seg.med<= loss, lossCol,
+            ifelse(subTable$seg.med>= gain, gainCol, "black")
             )
         gPlot <- gPlot+
             geom_segment(
                 data=subTable,
-                aes(x=loc.start, xend=loc.end, y=seg.mean, yend=seg.mean),
+                aes(x=loc.start, xend=loc.end, y=seg.med, yend=seg.med),
                 colour=GLcolors, size=2
                 )
         }
 
     return(gPlot)   
 }
-.addChr <- function(gPlot, chr, hg19){
+.addChr <- function(gPlot, chr, gBuild){
     if(is.null(gPlot))
         return(NULL)
+
+    HG <- switch(gBuild,
+        	hg18 = hg18,
+        	hg19 = hg19,
+        	hg38 = hg38)
 
     if(chr=="All") chr <- as.numeric(1:23)
     else chr <- as.numeric(chr)
@@ -216,28 +221,30 @@ options(warn=-1)
     if(is.null(ylim)){
         ylim <- range(gPlot$data$l2r)
     }
-    cumCentr <- 1/2*hg19$length+hg19$cumlen
+    cumCentr <- 1/2*HG$length + HG$cumlen
     gPlot <- gPlot+
-        geom_vline(xintercept = hg19$cumlen[chr], color = 'grey30',
+        geom_vline(xintercept = HG$cumlen[chr], color = 'grey30',
             linetype = 2, size = 0.25) +
         annotate('text', x=cumCentr[chr], y=rep(max(ylim, na.rm=TRUE)*.95,
             length(chr)), label=chr, size = 4, colour = 'grey40')
+
     return(gPlot)     
 }
 .addTitle <- function(gPlot, sampleName, gain, loss){
     if(is.null(gPlot))
         return(NULL)
 
-    Title = paste(unique(sampleName), '\nGain threshold: ', round(gain, 3),
-        ' Loss threshold:', round(loss, 3))
+    Title <- paste(unique(sampleName), '\nGain threshold: ', round(gain, 3),
+        ', Loss threshold:', round(loss, 3))
     gPlot <- gPlot + ggtitle(Title)
+
     return(gPlot)  
 }
-.addTag <- function(gPlot, geneAnnot, Yexpand, gain, loss){
+.addTag <- function(gPlot, geneAnnot){
     if(is.null(gPlot))
         return(NULL)
     
-    myBlue <- "darkblue"
+#    myBlue <- "darkblue"
     ylim <- gPlot$coordinates$limits$y
     ymin <- min(ylim); ymax <- max(ylim)
     symbol <- as.character(geneAnnot$symbol)
@@ -247,34 +254,18 @@ options(warn=-1)
 
     if(is.na(lr)) return(gPlot)
 
-    Col <- ifelse(lr<= loss, 'red3', ifelse(lr>=gain, myBlue, 'grey25'))
+    Col <- "grey25" #ifelse(lr<= loss, 'red3', ifelse(lr>=gain, myBlue, 'grey25'))
     gPlot <- gPlot +
         annotate("text",
             x=max(x, 2e8), y=yLabel,
             label=paste0(symbol, '\n(Log2R = ', round(lr, 3), ')'),
-            cex=5, colour=Col) +
+            fontface="bold", colour=Col) +
         geom_point(x=x, y=lr, size=6, pch=19, colour="black") +
         geom_point(x=x, y=lr, size=5, pch=19, colour="antiquewhite") +
-        geom_point(x=x, y=lr, size=4, pch=19, colour="darkorchid4") + #colour=ifelse(lr>0, "red3", "darkblue"))
+        geom_point(x=x, y=lr, size=4, pch=19, colour="darkorchid4") +
         geom_point(x=x, y=lr, size=1, pch=19, colour="cyan")
     
     return(gPlot)
-}
-.geneOfInt <- function(symbol, geneTable){
-    if(is.null(geneTable))
-        return(NULL)
-    
-    symbol <- toupper(symbol)
-    tmp <- geneTable[which(geneTable$symbol == symbol),]
-    
-    if(nrow(tmp)==0)
-        return(NULL)
-        
-    tmp
-}
-.renderLink <- function(uid){
-    sprintf("<a href=\"http://www.ncbi.nlm.nih.gov/gene/?term=%s[uid]\" 
-    target=\"_blank\" style=\"font-size:18px; \">%s</a>", uid, uid)
 }
 
 ###########################
@@ -289,7 +280,7 @@ options(warn=-1)
         if(nrow(sst)<2)
             return(sst)
         L <- .getSegLen(sst)
-        while(any(L < minSeg)){
+        while(any(L < minSeg) & nrow(sst)>1){
             i <- which(L < minSeg)[1]
             j <- .getCloser(sst, i)
             sst <- .mergeSegments(sst, i, j)
@@ -310,7 +301,7 @@ options(warn=-1)
     } else if (idx==nrow(segTable)){
         return(idx-1)
     } else {
-        delta <- abs(segTable$seg.mean[c(idx-1,idx+1)] - segTable$seg.mean[idx])
+        delta <- abs(segTable$seg.med[c(idx-1,idx+1)] - segTable$seg.med[idx])
         i <- ifelse(which.min(delta)==1, idx-1, idx+1)
         return(i)
     }
@@ -325,7 +316,6 @@ options(warn=-1)
     return(segTable)
 }
 
-#segTable <- .smoothSeg(segTable, minSeg)
 
 # End helper functions
 ###########################

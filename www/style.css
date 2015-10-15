@@ -19,6 +19,9 @@ table.data {
 tr{
     width: 100% !important;    
 }
+table.data td[align=right]{
+    text-align: left;
+}
 .table{
     width: 100% !important;
 }

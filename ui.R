@@ -1,3 +1,6 @@
+#############
+#aCGH_viewer
+#############
 
 shinyUI(
     pageWithSidebar(
@@ -25,12 +28,21 @@ shinyUI(
                                               '.gz')
         ),
         tags$hr(),
-                
-        h4('Gene symbol'),
-        div(id="geneSymbol", style="margin-top: -20px;", textInput("geneSymb",
-            '', 'NONE')),
+
+        h4("Genome build"),
+        div(class = "row-fuild", style="margin-top: -20px;",
+        	radioButtons("gBuild", "",
+        		choices = c("hg18", "hg19", "hg38"), selected = "hg19", inline = TRUE)
+        	),
         tags$hr(),
-                      
+                
+#        h4('Genome build'),
+
+        h4('Gene symbol'),
+        div(id="geneSymbol", style="margin-top: -20px;", textInput("geneSymbol", '', 'NONE')),
+#		textInput("geneSymbol", "", "NONE"),
+#        tags$hr(),
+
         h4('Show chromosome'),
         div(id="showChrom", style="margin-top: -20px;",
             selectInput(inputId = "chr", label = "", choices = c('All', 1:23),

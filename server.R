@@ -1,3 +1,7 @@
+#############
+#aCGH_viewer
+#############
+
 ###########################
 ###########################
 
@@ -9,78 +13,145 @@ shinyServer(function(input, output, session) {
 
     options(shiny.deprecation.messages=FALSE)
     
-    Input <- reactiveValues( segTable = data.frame() )    
-    observe({ Input$segTable <- .getData(input$file1$datapath) })
+    geneDB <- reactiveValues(
+    	gdb = GRanges()
+    	)
+    observe(({
+    	geneDB$gdb <- .makeGeneDB(input$gBuild)
+    	}))
 
-    gene <- reactiveValues( symbol=character() )
-    observe({ gene$symbol <- toupper(input$geneSymb) })
+    Input <- reactiveValues(
+    	segTable = data.frame(),
+    	geneTable = data.frame()
+    	)
+    observe({
+    	Input$segTable <- .getData(input$file1$datapath, input$minSeg, input$gBuild)
+    	Input$geneTable <- ByGene(Input$segTable, input$gBuild, geneDB$gdb)
+    	})
+
 
     reCenterSeg <- reactive({
-        seg <- Input$segTable
-        if(!is.null(seg) && seg != 1){
-            if(as.numeric(input$minSeg) > 10)
-                seg <- .smoothSeg(seg, input$minSeg)
-            seg$seg.mean <- seg$seg.mean + input$center
-            return(seg)
+        st <- Input$segTable
+        if(!is.null(st) && st != 1){
+            st$seg.med <- st$seg.med + input$center
+            return(st)
             }
         return(NULL)
         })
 
+    # reSmoothSeg <- reactive({
+    #     st <- reCenterSeg()
+    #     if(is.null(st))
+    #         return(NULL)
+
+    #     if(input$minSeg != "" | as.numeric(input$minSeg) > 10)
+    #         st <- .smoothSeg(st, input$minSeg)
+
+    #     st
+    #     })
+
     reCenterGenes <- reactive({
-        if(is.null(Input$segTable))
+        if(is.null(Input$geneTable))
             return(NULL)
 
-        geneTable <- ByGene(reCenterSeg())
+        geneTable <- Input$geneTable
         geneTable$Log2Ratio <- geneTable$Log2Ratio + input$center
+		lrr <- geneTable$Log2Ratio
+		fc <- ifelse(lrr>=0, round(2^lrr, 1), round(-1/2^lrr, 1))
+	    geneTable$"ApproxCN" <- 2*fc
         return(geneTable)
         })
 
-    createCGHplot <- reactive({
+    mainPlot <- reactive({
         seg <- reCenterSeg()
         if(is.null(seg)){
             .welcome()
             return(NULL)
         }
         gPlot <- .mainPlot(seg)
+        gPlot
+        })
+
+    segmentPlot <- reactive({
+        seg <- reCenterSeg()
+        gPlot <- mainPlot()
+        if(is.null(gPlot))
+            return(NULL)
+
         gPlot <- .addSegments(gPlot, seg, input$chr, input$gain, input$loss, input$segLen, input$GLcols)
-        gPlot <- .updateScale(gPlot, input$chr, hg19, input$Ymin, input$Ymax)
-        gPlot <- .addChr(gPlot, input$chr, hg19)
+        gPlot <- .updateScale(gPlot, input$chr, input$gBuild, input$Ymin, input$Ymax)
+        gPlot <- .addChr(gPlot, input$chr, input$gBuild)
         gPlot <- .addTitle(gPlot, Input$segTable$ID, input$gain, input$loss)
 
-        if(!gene$symbol %in% c('NONE', '')){
-            geneAnnot <- try(.geneOfInt(gene$symbol, reCenterGenes()), silent = TRUE)
-
-            if(class(geneAnnot)[1] != 'try-error' & !is.null(geneAnnot)){
-                gPlot <- .addTag(gPlot, geneAnnot, input$Yexpand, input$gain, input$loss)
-            }
-        }
         gPlot
     })
 
-    createSummary <- reactive({
-        if(gene$symbol %in% c('NONE', '')) return(NULL)
+    createCGHplot <- reactive({
+        gPlot <- segmentPlot()
+        if(is.null(gPlot))
+            return(NULL)
 
-        geneAnnot <- try(.geneOfInt(gene$symbol, reCenterGenes()), silent = TRUE)
-        
-        if(class(geneAnnot)[1] != 'try-error' & !is.null(geneAnnot)){
-            selected <- geneAnnot[,c("symbol", "entrezid", "fullName",
-                "cytoband", "Log2Ratio", "segNum", "segLength(kb)")]
-            selected$Log2Ratio <- round(selected$Log2Ratio, 3)
-            for(ii in seq_len(ncol(selected)))
-                selected[,ii] <- as.character(selected[,ii])
-        } else{
-            selected <- data.frame(message=sprintf("\"%s\" does not seem to be 
-                an official HUGO symbol.", gene$symbol))
+        geneTable <- reCenterGenes()
+        gene <- toupper(input$geneSymbol)
+        if(!gene %in% c('NONE', '')){
+#            geneAnnot <- try(ByGene(reCenterSeg(), input$geneSymbol), silent = TRUE)
+
+            if(gene %in% geneTable$symbol){
+            	geneAnnot <- geneTable[which(geneTable$symbol == gene),]
+                gPlot <- .addTag(gPlot, geneAnnot)
+            }
         }
-        return(selected)
+
+        gPlot        
+    })
+
+    createSummary <- reactive({
+
+        gene <- toupper(input$geneSymbol)
+        if(input$geneSymbol %in% c('NONE', ''))
+            return(NULL)
+
+        # st <- reCenterSeg()
+        # if(is.null(st))
+        #     return(NULL)
+
+		geneTable <- reCenterGenes()
+		if(!gene %in% geneTable$symbol){
+            msg <- sprintf("'%s' may not be a valid HUGO symbol", toupper(input$geneSymbol))
+            return( data.frame(Error = msg) )			
+		}
+		else{
+			geneAnnot <- geneTable[which(geneTable$symbol == gene),]
+	        chr <- as.integer(geneAnnot$chr)
+	        chrStart <- as.integer(geneAnnot$chrStart)
+	        chrEnd <- as.integer(geneAnnot$chrEnd)
+	        geneAnnot$position <- sprintf("chr%s:%s-%s", chr, chrStart, chrEnd)
+	        geneAnnot$segNum <- as.integer(geneAnnot$segNum)
+	        geneAnnot$"segLength(kb)" <- as.integer(geneAnnot$"segLength(kb)")
+	        geneAnnot <- geneAnnot[,c("symbol", "entrezid", "fullName",
+	            "position", "segNum", "segLength(kb)", "Log2Ratio", "ApproxCN")]
+
+	        return(geneAnnot)
+			}
+
         })
 
     createFullTable <- reactive({
-        gt <- reCenterGenes()
-        if(is.null(gt))
+
+        if(is.null(Input$geneTable))
             return(NULL)
-        
-        gt$Log2Ratio <- round(gt$Log2Ratio, 3)
+
+        geneTable <- reCenterGenes()
+        geneTable <- geneTable[,c("symbol", "entrezid", "fullName",
+            "chr", "cytoband", "chrStart", "chrEnd",
+            "segNum", "segLength(kb)", "Log2Ratio", "ApproxCN")]
+        geneTable$Log2Ratio <- round(geneTable$Log2Ratio, 2)
+        geneTable$entrezid <- .renderLink(geneTable$entrezid)
+        geneTable
+        })
+
+    filterGeneTable <- reactive({
+        geneTable <- createFullTable()
 
         if(input$chr=="All"){
             chr <- 1:23
@@ -88,23 +159,17 @@ shinyServer(function(input, output, session) {
             chr <- as.numeric(input$chr)
         }
 
-        gt <- gt[gt$chr %in% chr,]
-        greater <- as.numeric(input$gain)
-        lower <- (-abs(as.numeric(input$loss)))
-
         if(input$segLen %in% c("All", "")){
             segLen <- Inf
         } else{
             segLen <- as.numeric(input$segLen)
         }
 
-        gt <- gt[(gt$Log2Ratio>=greater | gt$Log2Ratio<=lower) & 
-            gt$"segLength(kb)"/1e3 <= segLen,]
-        if(nrow(gt)>0){
-            gt[, "entrezid"] <- .renderLink(gt[, "entrezid"])
-            return(gt[,c("symbol", "fullName", "chr", "cytoband", 
-                "entrezid", "Log2Ratio", "segNum", "segLength(kb)")])
-            } else return(NULL)
+        greater <- as.numeric(input$gain)
+        lower <- (-abs(as.numeric(input$loss)))
+
+        geneTable <- .filterBygene(geneTable, chr, greater, lower, segLen)
+        return(geneTable)
         })
 
     createTitle1 <- reactive({
@@ -135,7 +200,7 @@ shinyServer(function(input, output, session) {
     output$geneSummary <- renderTable({ createSummary() })
     output$tableTitle1 <- renderText({ createTitle1() })
     output$tableTitle2 <- renderText({ createTitle2() })
-    output$fullTable <- renderDataTable({ createFullTable() },
+    output$fullTable <- renderDataTable({ filterGeneTable() },
         options=list(lengthMenu=c(25, 50, 100)), escape = FALSE)
 
     # Download functions

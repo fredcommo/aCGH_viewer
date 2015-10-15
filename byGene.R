@@ -1,14 +1,34 @@
+#############
+#aCGH_viewer
+#############
 
+message("Sourcing byGene...")
+
+library(TxDb.Hsapiens.UCSC.hg18.knownGene)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 library( org.Hs.eg.db)
 
-txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
-geneDB  <- genes(txdb, columns=c("gene_id"))
+#txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+#geneDB  <- genes(txdb, columns=c("gene_id"))
+
+###############################################
+## helpers called in byGeneTable.R
+###############################################
+.makeGeneDB <- function(gBuild){
+	message("Building geneDB ", gBuild)
+	txdb <- switch(gBuild,
+		hg18 = TxDb.Hsapiens.UCSC.hg18.knownGene,
+		hg19 = TxDb.Hsapiens.UCSC.hg19.knownGene,
+		hg38 = TxDb.Hsapiens.UCSC.hg38.knownGene
+		)
+	genes(txdb, columns=c("gene_id"))
+}
 
 .cmValues <- function(segTable, hg){
     cmLocs <- .locateCM(segTable, hg)
     out <- lapply(cmLocs, function(locs){
-        c(segTable$seg.mean[locs[1]], segTable$seg.mean[locs[2]])
+        c(segTable$seg.med[locs[1]], segTable$seg.med[locs[2]])
         })
     return(out)
 }
@@ -48,43 +68,11 @@ geneDB  <- genes(txdb, columns=c("gene_id"))
         })
     return(do.call(c, relativeLog))
 }
-# .getGenesFromSeg <- function(chr, Start, End){
-#     # chr: a integer, from 1 to 24
-#     # Start, End: numeric. Start/End segment position (from segmentation table)
-
-#     geneDB <- geneDB
-
-#     if(chr==23) chr <- "X"
-#     if(chr==24) chr <- "Y"
-    
-#     chr <- sprintf("chr%s", chr)
-
-#     ii <- which(as.vector(seqnames(geneDB)) == chr)
-#     jj <- intersect(ii, which(Start <= start(geneDB) & start(geneDB) <= End))
-#     kk <- intersect(ii, which(Start <= end(geneDB) & end(geneDB) <= End))
-#     idx <- unique(union(jj, kk))
-
-#     if(length(idx) == 0)
-#         return(NULL)
-
-#     bySymbol <- select(org.Hs.eg.db,
-#                         keys=geneDB$gene_id[idx],
-#                         keytype='ENTREZID',
-#                         columns=c('SYMBOL', 'GENENAME', 'MAP')
-#         )
-#     byRange <- as.data.frame(geneDB[idx])
-        
-#     geneList <- merge(bySymbol, byRange,
-#                         by.x = "ENTREZID", by.y = "gene_id", all = TRUE)
-
-#     .renameGeneList(geneList)
-# }
-
-.getGenesFromSeg <- function(chr, Start, End){
+.getGenesFromSeg <- function(geneDB, chr, Start, End){
     # chr: a integer, from 1 to 24
     # Start, End: numeric. Start/End segment position (from segmentation table)
 
-    geneDB <- geneDB
+#    geneDB <- geneDB
 
     if(chr==23) chr <- "X"
     if(chr==24) chr <- "Y"
@@ -127,12 +115,12 @@ geneDB  <- genes(txdb, columns=c("gene_id"))
     geneList$chr <- as.numeric(geneList$chr)
     geneList
 }
-.addGenomeLoc <- function(bygene){
-    hg19 <- hg19
+.addGenomeLoc <- function(bygene, HG){
+#    hg19 <- hg19
     ss <- split(bygene, bygene$chr)
     bygene <- lapply(ss, function(tmp){
         chr <- unique(tmp$chr)
-        tmp$genomeStart <- tmp$chrStart + hg19$cumlen[chr]
+        tmp$genomeStart <- tmp$chrStart + HG$cumlen[chr]
         return(tmp)
     })
     bygene <- as.data.frame(do.call(rbind, bygene))
@@ -140,37 +128,73 @@ geneDB  <- genes(txdb, columns=c("gene_id"))
     rownames(bygene) <- seq_len(nrow(bygene))
     bygene
 }
-.genometoChrLoc <- function(segTable){
+.chrToGenomeLoc <- function(segTable, HG){
     splitTable <- split(segTable, segTable$chrom)
     newTable <- lapply(splitTable, function(tmp){
         chr <- unique(tmp$chrom)
-        tmp$loc.start <- tmp$loc.start - hg19$cumlen[chr]
-        tmp$loc.end <- tmp$loc.end - hg19$cumlen[chr]
+        tmp$loc.start <- tmp$loc.start + HG$cumlen[chr]
+        tmp$loc.end <- tmp$loc.end + HG$cumlen[chr]
         tmp
     })
     do.call(rbind.data.frame, newTable)
 }
-ByGene <- function(st){
+.genometoChrLoc <- function(segTable, HG){
+    splitTable <- split(segTable, segTable$chrom)
+    newTable <- lapply(splitTable, function(tmp){
+        chr <- unique(tmp$chrom)
+        tmp$loc.start <- tmp$loc.start - HG$cumlen[chr]
+        tmp$loc.end <- tmp$loc.end - HG$cumlen[chr]
+        tmp
+    })
+    do.call(rbind.data.frame, newTable)
+}
+.renderLink <- function(uid){
+    sprintf("<a href=\"http://www.ncbi.nlm.nih.gov/gene/?term=%s[uid]\" 
+    target=\"_blank\" style=\"font-size:18px; \">%s</a>", uid, uid)
+}
+.setCores <- function(){
+    if(.Platform$OS.type == "windows"){
+        return(1)
+    }
+
+    maxCores <- detectCores()
+    return(max(1, maxCores/2))
+}
+.filterBygene <- function(bg, chr, greater, lower, segLen){
+
+    ii <- which(bg$chr %in% chr)
+    jj <- which(bg$Log2Ratio>=greater | bg$Log2Ratio<=lower)
+    kk <- which(bg$"segLength(kb)"/1e3 <= segLen)
+    idx <- Reduce(intersect, list(ii, jj, kk))
+    bg[idx,]
+
+}
+ByGene <- function(st, gBuild, geneDB){
     if(is.null(st) || st == 1)
         return(NULL)
 
-    st <- .genometoChrLoc(st)
-    hg19 <- hg19
+    HG <- switch(gBuild,
+        	hg18 = hg18,
+        	hg19 = hg19,
+        	hg38 = hg38)
+    st <- .genometoChrLoc(st, HG)
+
+#    hg19 <- hg19
     bygene <- lapply(seq_len(nrow(st)), function(ii){
-        g <- .getGenesFromSeg(chr=st$chrom[ii], Start=st$loc.start[ii], End=st$loc.end[ii])
+        g <- .getGenesFromSeg(geneDB, chr=st$chrom[ii], Start=st$loc.start[ii], End=st$loc.end[ii])
         if(is.null(g))
             return(NULL)
 
         cbind.data.frame(g,
-                        Log2Ratio=st$seg.mean[ii],
-                        num.mark=st$num.mark[ii], segNum=ii,
+                        Log2Ratio=st$seg.med[ii],
+                        num.mark=st$num.mark[ii],
+                        segNum=ii,
                         "segLength(kb)"=round(abs(st$loc.start[ii] - st$loc.end[ii])/1e3, 2)
                         )
     })
+    #, mc.cores = .setCores())
     bygene <- do.call(rbind, bygene)
-    cmValues <- .cmValues(st, hg19)
-    bygene$relativeLog <- .relativeLog(bygene, cmValues, hg19)
-    .addGenomeLoc(bygene)
+    # cmValues <- .cmValues(st, hg19)
+    # bygene$relativeLog <- .relativeLog(bygene, cmValues, hg19)
+    .addGenomeLoc(bygene, HG)
 }
-
-#.ByGene(segTable)
