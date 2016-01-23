@@ -2,29 +2,53 @@ body{
     background-color: #E6E6E6;
     font-size: 16px;
 }
+
 img {
     width: 100% !important;
     height: auto !important;
 }
+
 hr{
     margin: 1px 1px;
     border-width: 2px 0px 0px;
     border-color: rgba(6, 4, 181, 1) !important;
 }
-table.data {
-    width: 70%;
-    margin-top: 20px;
-    border: 2px solid;
+
+.link {
+    padding-top: 18px;
+    font-size: 16px;
+    text-align: right;
+    text-align: -webkit-right;
+    text-align: -moz-right;
 }
-tr{
-    width: 100% !important;    
+
+.nav-tabs>li>a {
+    margin-right: 2px;
+    line-height: 1.42857143;
+    border: 1px solid transparent;
+    border-radius: 10px 20px 0 0;
+    -moz-border-radius: 10px 20px 0 0;
+    -webkit-border-radius: 10px 20px 0 0;
 }
-table.data td[align=right]{
-    text-align: left;
+
+div.row >.col-sm-12 >h1 {
+    font-size: 34px;
+    margin-top: 0;
+    padding-left: 20px;
+    color: #d35400;
+    text-shadow: 2px 2px 2px #bdc3c7;
 }
-.table{
-    width: 100% !important;
+
+#file1_progress {
+    margin: 5px 0;
+    visibility: visible;
+    background: transparent;
 }
+
+ .well >h4 {
+    margin-bottom: 0px;
+ }
+
 .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
     color: rgb(21, 38, 168);
     cursor: default;
@@ -47,14 +71,20 @@ table.data td[align=right]{
     height: auto;
     margin: 0;
 }
-.col-sm-4{
+
+.col-sm-4 {
     max-width: 300px !important;
     margin-left: 10px !important;
     margin-bottom: 10px !important;
-    background-color: #DBE9F1;
-    border: 2px solid #00006B;
+    background-color: rgba(243,156,18,0.1);
+    border: 2px solid #f39c12;
     color: #005C8A;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    max-height: 970px;
 }
+
 .col-sm-8 {
     float: left;
     width: 100% !important;
@@ -62,33 +92,228 @@ table.data td[align=right]{
     margin-left: 20px;
     margin-bottom: 10px !important;
     padding: 10px;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
 }
+
 .col-sm-12 {
     float: left;
     width: auto !important;
-    margin-bottom: 5px;
     padding-left: 0px;
     padding-right: 0px;
 }
-.well {
-    background-color: #DBE9F1;
-    border: none;
+
+.col-md-12 {
+    margin-top: -20px;
 }
+
+.downloads {
+    padding-left: 0;
+    padding-right: 0;
+    margin-bottom: 10px;
+    margin-top: -5px;
+}
+
+form.well {
+    min-height: 20px;
+    padding: 19px;
+    margin-bottom: 20px;
+    background-color: transparent;
+
+}
+
+.col-xs-4 {
+    text-align: center;
+    text-align: -webkit-center;
+    text-align: -moz-center;
+}
+
+.col-xs-5 {
+    padding-right: 0;
+}
+
+.col-xs-7 {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 26px;
+    font-size: 17px;
+    font-weight: 900;
+}
+
+.col-xs-7 >p {
+    margin-bottom: 0;
+    font-size: 16px !important;
+}
+
+.col-xs-offset-1 {
+    margin-left: 0;
+}
+
+label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 5px;
+    font-weight: 700;
+    color: #005C8A;
+}
+
+.btn-success {
+    color: #ecf0f1;
+    font-size: 15px;
+    text-shadow: 1px 1px 2px #2c3e50;
+}
+
+.sliders-bottom {
+    margin-bottom: 15px;
+    margin-top: 0;
+    padding: 18px 0;
+    background-color: rgba(243,156,18,0.1);
+    border: 2px solid #f39c12;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+}
+
+/* recenter slider*/
+#recenter span.irs-line {
+    height: 8px;
+    top: 25px;
+    border-top: 0px solid #bdc3c7;
+    border-bottom: 0px solid #bdc3c7;
+    background: #2c3e50;
+    opacity: .5;
+}
+
+#recenter .irs-bar {
+    height: 8px;
+    top: 25px;
+    background: #2c3e50;
+    border-top: 1px solid #bdc3c7;
+    border-bottom: 1px solid #bdc3c7;
+    border-radius: 16px;
+    opacity: 0.1;
+}
+
+#recenter .irs-bar-edge {
+    height: 8px;
+    top: 25px;
+    background: #2c3e50;
+    border-top: 1px solid #bdc3c7;
+    border-bottom: 1px solid #bdc3c7;
+    border-radius: 16px 0 0 16px;
+    -moz-border-radius: 16px 0 0 16px;
+    opacity: 0.1;
+}
+
+/* loss-threshold slider*/
+#loss-thres span.irs-line {
+    height: 8px;
+    top: 25px;
+    border-top: 1px solid #428bca;
+    border-bottom: 1px solid #428bca;
+    background: #428bca;
+}
+
+#loss-thres .irs-bar {
+    height: 8px;
+    top: 25px;
+    background: #EEE;
+    background: linear-gradient(to bottom, #DDD -50%, #FFF 150%);
+    border: 1px solid #CCC;
+    border-radius: 16px;
+}
+
+#loss-thres .irs-bar-edge {
+    height: 8px;
+    top: 25px;
+    background: #EEE;
+    background: linear-gradient(to bottom, #DDD -50%, #FFF 150%);
+    border: 1px solid #CCC;
+    border-radius: 16px 0 0 16px;
+    -moz-border-radius: 16px 0 0 16px;
+}
+
+.irs-min, .irs-max {
+    color: #333;
+    font-size: 15px;
+    line-height: 1.333;
+    top: 0;
+    padding: 1px 3px;
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    background-color: transparent !important;
+}
+
+.irs-slider {
+    top: 17px;
+    width: 22px;
+    height: 22px;
+    border: 1px solid #AAA;
+    background: #d35400;
+    border-radius: 27px;
+    -webkit-border-radius: 27px;
+    -moz-border-radius: 27px;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+
+#irs-active-slider, .irs-slider:hover {
+    background: #1dd2af;
+    box-shadow: -2px -2px 3px rgba(0,0,0,0.3);
+}
+
+#last-slider {
+    margin-bottom: -15px;
+}
+
+#GLcols {
+    margin-top: 10px;
+}
+
 #ftype{
     font-size: 15px;
 }
+
 #Profile{
     border: 1px solid #DBE9F1;
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
 #progress1, #progress2{
     font-size: 22px;
 }
-/*
-#LOH{
-    border: 1px solid #DBE9F1;
-    margin-top: 10px;
-    margin-bottom: 10px;
+
+/* Gene summary styling */
+#geneSummary {
+    width: 100%;
+
+    background-color: rgba(243,156,18,0.1);
+    border: 2px solid #f39c12;
+    color: #005C8A;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;    
 }
-*/
+
+/* Tables styling */
+table.data {
+    width: 80%;
+    margin-top: 10px;
+    border: 0px;
+}
+
+tr{
+    width: 100% !important;    
+}
+
+table.data td[align=right]{
+    text-align: left;
+}
+
+.table{
+    width: 100% !important;
+}
+

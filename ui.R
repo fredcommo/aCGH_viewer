@@ -1,6 +1,3 @@
-#############
-#aCGH_viewer
-#############
 
 shinyUI(
     pageWithSidebar(
@@ -11,7 +8,7 @@ shinyUI(
         #includeCSS("shinySafir.css"),
         tags$head( tags$link(rel="stylesheet", type="text/css", href="style.css") ),
 
-        tags$hr(),
+#        tags$hr(),
         h4("Choose a file", br(),
            div(id="ftype", em("(.csv, .tsv, .txt, .bz2, .gz)"))
            ),
@@ -57,21 +54,26 @@ shinyUI(
         ),
 
         textInput("minSeg", "Merging segments shorter than (Kb)", 25),
-        sliderInput("center", "Recenter profile", min=-1.5, max=1.5, value=0,
-            step = .1),
+        # sliderInput("center", "Recenter profile", min=-1.5, max=1.5, value=0,
+        #     step = .1),
         sliderInput("Ymax", "Rescale max(y)", min=.1, max=1, value=1, step=.1),
-        sliderInput("Ymin", "Rescale min(y)", min=.1, max=1, value=1, step=.1),
-        sliderInput("gain", "Gain threshold (Log2ratio)", min=0, max=2,
-            value=.5, step = .25),
-        sliderInput("loss", "Loss threshold (Log2ratio)", min=-2, max=0,
-            value=-.5, step = .25),
-        withTags(div(class='row-fluid', style="margin-bottom: 75px;",
-            align="center",
-                div(class="span3", style="float: left; width: 40% !important;",
-                    p("Segment length (< Mb)", style="font-size: 14px; 
-                        font-weight: bold;")),
-                div(class='span3', style="float: right; width: 40% !important; 
-                    margin-top: -20px;", textInput("segLen", "", "All") )
+        div(id="last-slider",
+            sliderInput("Ymin", "Rescale min(y)", min=.1, max=1, value=1, step=.1)
+            ),
+        # sliderInput("gain", "Gain threshold (Log2ratio)", min=0, max=2,
+        #     value=.5, step = .25),
+        # div(id="last-slider",
+        #     sliderInput("loss", "Loss threshold (Log2ratio)", min=-2, max=0,
+        #         value=-.5, step = .25)
+        # ),
+        withTags(
+            div(class="row",
+                div(class='col-md-12', style="padding: 0px 0px;",
+                    div(class="col-xs-7", style="float: left;",
+                        p("Seg length(<Mb)", style="font-size: 14px; 
+                            font-weight: bold;")),
+                    div(class='col-xs-5', textInput("segLen", "", "All") )
+                    )
                 )
         ),
 
@@ -79,20 +81,23 @@ shinyUI(
 
         h4("Download"),
         withTags(
-            div(
-                class='row-fluid', style="margin-bottom: 65px;", align="center",
-                div(class='span6 offset4 text-left', style="float: left; width: 35% !important",
-                    downloadButton('downloadPlot', 'Profile') ),
-                div(class='span6 offset4 text-right', style="float: right; width: 35% !important",
-                    downloadButton('downloadData', 'Table') )
+            div(class='row',
+                div(class="col-md-12 downloads",
+                    div(class='col-xs-4 col-xs-offset-1',
+                        downloadButton('downloadPlot', 'Profile', class="btn btn-success")
+                        ),
+                    div(class='col-xs-4 col-xs-offset-2',
+                        downloadButton('downloadData', 'Table', class="btn btn-success")
+                        )
+                    )
                 )
             ),
 
         tags$hr(),
         withTags(
             div(
-            class='row-fluid', style="margin-top: 20px;", align="left",
-            a("@Contact us", style="font-size: 14px;",
+            class='row-fluid link',
+            a("frederic.commo@gustaveroussy.fr",
             href="mailto:frederic.commo@gustaveroussy.fr?Subject=aCGH%20Viewer",
             target="_top")
             )
@@ -104,14 +109,24 @@ shinyUI(
                 tabPanel("Genomic profile",
                     plotOutput("Profile", width = "100%", height = "100%"),
                     tags$hr(),
+                    div(class="row",
+                        div(class="col-md-12 sliders-bottom",
+                            div(class="col-xs-4", id="recenter",
+                                sliderInput("center", "Recenter profile",
+                                    min=-1.5, max=1.5, value=0, step = .1)
+                                ),
+                            div(class="col-xs-4", id="loss-thres",
+                                sliderInput("loss", "Loss threshold (Log2ratio)",
+                                    min=-2, max=0, value=-.5, step = .25)
+                                ),
+                            div(class="col-xs-4", id="gain-thres",
+                                sliderInput("gain", "Gain threshold (Log2ratio)",
+                                    min=0, max=2, value=.5, step = .25)
+                                )
+                            )
+                        ),
                     textOutput("progress1", inline=TRUE),
-#                     plotOutput("LOH", width = "100%", height = "100%"),
-#                     tags$hr(),
-                    div(
-                        class='row-fluid',
-                        style="width: 100%;",
-                        align="center", tableOutput("geneSummary")
-                        )
+                    div(class='row-fluid', tableOutput("geneSummary") )
                     ),
                 tabPanel("Genes table",
                     h4(textOutput("tableTitle1"), align="center"),

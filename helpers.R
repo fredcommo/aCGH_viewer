@@ -1,7 +1,3 @@
-#############
-#aCGH_viewer
-#############
-
 ###########################
 # Scale Shiny app on .io
 ## Instance Memory

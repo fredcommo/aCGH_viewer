@@ -39,16 +39,15 @@
 
 #### aCGH Viewer features:
 1. Load a segmentation file stored locally
-2. Choose the genome build you are using
-3. Display genes using valid HUGO symbols
-4. Select the full profile, or isolate a specific chromosome
-5. Change Gain/Loss colors
-6. Merge segments shorter than a specified value, in Kb
-7. Recenter the entire profile
-8. Rescale the y-axis
-9. Define the Gain/Loss and segment length thresholds to only display the relevant regions. The 'Genes table' will be filtered, accordingly.
-10. Download the profile as it appears on the screen
-11. Download the gene values
+2. Display genes using valid HUGO symbols
+3. Select the full profile, or isolate a specific chromosome
+4. Change Gain/Loss colors
+5. Merge segments shorter than a specified valie, in Kb
+6. Recenter the entire profile
+7. Rescale the y-axis
+8. Define the Gain/Loss and segment length thresholds to only display the relevant regions. The 'Genes table' will be filtered, accordingly.
+9. Download the profile as it appears on the screen
+10. Download the gene values
 
 #### The gene values are automatically updated with any change made on the profile.
 

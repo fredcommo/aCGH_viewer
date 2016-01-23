@@ -1,6 +1,3 @@
-#############
-#aCGH_viewer
-#############
 
 message("Sourcing byGene...")
 

@@ -1,7 +1,3 @@
-#############
-#aCGH_viewer
-#############
-
 ###########################
 ###########################
 
@@ -56,9 +52,6 @@ shinyServer(function(input, output, session) {
 
         geneTable <- Input$geneTable
         geneTable$Log2Ratio <- geneTable$Log2Ratio + input$center
-		lrr <- geneTable$Log2Ratio
-		fc <- ifelse(lrr>=0, round(2^lrr, 1), round(-1/2^lrr, 1))
-	    geneTable$"ApproxCN" <- 2*fc
         return(geneTable)
         })
 
@@ -129,7 +122,7 @@ shinyServer(function(input, output, session) {
 	        geneAnnot$segNum <- as.integer(geneAnnot$segNum)
 	        geneAnnot$"segLength(kb)" <- as.integer(geneAnnot$"segLength(kb)")
 	        geneAnnot <- geneAnnot[,c("symbol", "entrezid", "fullName",
-	            "position", "segNum", "segLength(kb)", "Log2Ratio", "ApproxCN")]
+	            "position", "segNum", "segLength(kb)", "Log2Ratio")]
 
 	        return(geneAnnot)
 			}
@@ -144,7 +137,7 @@ shinyServer(function(input, output, session) {
         geneTable <- reCenterGenes()
         geneTable <- geneTable[,c("symbol", "entrezid", "fullName",
             "chr", "cytoband", "chrStart", "chrEnd",
-            "segNum", "segLength(kb)", "Log2Ratio", "ApproxCN")]
+            "segNum", "segLength(kb)", "Log2Ratio")]
         geneTable$Log2Ratio <- round(geneTable$Log2Ratio, 2)
         geneTable$entrezid <- .renderLink(geneTable$entrezid)
         geneTable
