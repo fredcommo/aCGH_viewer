@@ -35,17 +35,6 @@ shinyServer(function(input, output, session) {
         return(NULL)
         })
 
-    # reSmoothSeg <- reactive({
-    #     st <- reCenterSeg()
-    #     if(is.null(st))
-    #         return(NULL)
-
-    #     if(input$minSeg != "" | as.numeric(input$minSeg) > 10)
-    #         st <- .smoothSeg(st, input$minSeg)
-
-    #     st
-    #     })
-
     reCenterGenes <- reactive({
         if(is.null(Input$geneTable))
             return(NULL)
@@ -58,7 +47,7 @@ shinyServer(function(input, output, session) {
     mainPlot <- reactive({
         seg <- reCenterSeg()
         if(is.null(seg)){
-            .welcome()
+#            .welcome()
             return(NULL)
         }
         gPlot <- .mainPlot(seg)
@@ -79,16 +68,32 @@ shinyServer(function(input, output, session) {
         gPlot
     })
 
+    checkFile <- reactive({
+            if(is.null(input$file1$datapath))
+                return(0)
+            return(1)
+        })
+
+    welcomeImage <- reactive({
+        return(
+            list(
+                src="www/images/welcome.png",
+                filetype="image/png",
+                alt="welcome-image"
+                )
+            )
+    })
+
     createCGHplot <- reactive({
+
         gPlot <- segmentPlot()
         if(is.null(gPlot))
             return(NULL)
 
         geneTable <- reCenterGenes()
         gene <- toupper(input$geneSymbol)
-        if(!gene %in% c('NONE', '')){
-#            geneAnnot <- try(ByGene(reCenterSeg(), input$geneSymbol), silent = TRUE)
 
+        if(!gene %in% c('NONE', '')){
             if(gene %in% geneTable$symbol){
             	geneAnnot <- geneTable[which(geneTable$symbol == gene),]
                 gPlot <- .addTag(gPlot, geneAnnot)
@@ -103,10 +108,6 @@ shinyServer(function(input, output, session) {
         gene <- toupper(input$geneSymbol)
         if(input$geneSymbol %in% c('NONE', ''))
             return(NULL)
-
-        # st <- reCenterSeg()
-        # if(is.null(st))
-        #     return(NULL)
 
 		geneTable <- reCenterGenes()
 		if(!gene %in% geneTable$symbol){
@@ -187,6 +188,8 @@ shinyServer(function(input, output, session) {
     })
 
     # outputs to ui
+    output$checkFile <- renderText({ checkFile() })
+    output$welcomeImage <- renderImage({ welcomeImage() }, deleteFile = FALSE)
     output$Profile <- renderPlot({ createCGHplot() }, res=120, width=1500, height=650)
     output$progress1 <- renderText( progressText() )
     output$progress2 <- renderText( progressText() )

@@ -45,6 +45,13 @@ div.row >.col-sm-12 >h1 {
     background: transparent;
 }
 
+#welcomeImage {
+    height: 100% !important;
+    width: auto !important;
+    padding-bottom: 15px;
+    margin-top: -15px;
+}
+
  .well >h4 {
     margin-bottom: 0px;
  }

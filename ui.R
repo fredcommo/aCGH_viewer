@@ -103,12 +103,27 @@ shinyUI(
             )
             )
         ),
-
+#, style="visibility: collapse; height: 0px;"
         mainPanel(
+            # tabPanel 1
             tabsetPanel(
                 tabPanel("Genomic profile",
-                    plotOutput("Profile", width = "100%", height = "100%"),
+                    h6(verbatimTextOutput("checkFile"),
+                        style="visibility: collapse; height: 0px;"),
+                    conditionalPanel(
+                        condition = "output.checkFile == '0'",
+                        withTags(
+                            div(class="row",
+                                div(class="col-md-12", imageOutput("welcomeImage"))
+                                )
+                            )
+                        ),
+                    conditionalPanel(
+                        "output.checkFile == '1'",
+                        plotOutput("Profile", width = "100%", height = "100%")
+                        ),
                     tags$hr(),
+
                     div(class="row",
                         div(class="col-md-12 sliders-bottom",
                             div(class="col-xs-4", id="recenter",
@@ -128,14 +143,17 @@ shinyUI(
                     textOutput("progress1", inline=TRUE),
                     div(class='row-fluid', tableOutput("geneSummary") )
                     ),
-                tabPanel("Genes table",
-                    h4(textOutput("tableTitle1"), align="center"),
-                    h4(textOutput("tableTitle2"), align="center"),
-                    tags$hr(),
-                    dataTableOutput("fullTable"),
-                    textOutput("progress2", inline=TRUE)
-                    )
+
+            # tabPanel 1
+            tabPanel("Genes table",
+                h4(textOutput("tableTitle1"), align="center"),
+                h4(textOutput("tableTitle2"), align="center"),
+                tags$hr(),
+                dataTableOutput("fullTable"),
+                textOutput("progress2", inline=TRUE)
                 )
-            )
-        )
+            
+            ) # end tabsetPanel
+        ) # end mainPanel
+    )
 )
